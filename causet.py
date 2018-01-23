@@ -46,7 +46,7 @@ def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements a
     xDict = {}
     xDict['X0'] = t.T - t
     for i in range(1, d):
-        xDict['X' + str(i)] = x[i, :].reshape(n, 1) - x[i, :].reshape(1, n)
+        xDict['X' + str(i)] = x[i-1, :].reshape(n, 1) - x[i-1, :].reshape(1, n)
     
     ds2 = -xDict['X0']**2
     for i in range(1, d):
