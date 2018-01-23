@@ -6,18 +6,18 @@ def polar2Cart(theta, phi):
     cosPhi = np.cos(phi); sinPhi = np.sin(phi) 
 
     d = theta.size[0] + 2; n = theta.size[1]
-    X = np.zeros(d-1, n)
+    x = np.zeros(d-1, n)
     indices = np.arange(d-2)
 
     for i in range(d-3):
-        X[i, :] = np.prod(sinTheta[indices != i, :], axis = 0) * cosTheta[i, :]
+        x[i, :] = np.prod(sinTheta[indices != i, :], axis = 0) * cosTheta[i, :]
 
 #https://tribordo.wordpress.com/2013/06/18/how-to-select-all-rows-except-one-in-python-with-numpy/
 
-    X[d-2, :] = np.prod(sinTheta, axis = 0) * sinPhi
-    X[d-1, :] = np.prod(sinTheta, axis = 0) * cosPhi
+    x[d-2, :] = np.prod(sinTheta, axis = 0) * sinPhi
+    x[d-1, :] = np.prod(sinTheta, axis = 0) * cosPhi
 
-    return X
+    return x
 
 
 def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements and curvature c
@@ -27,8 +27,9 @@ def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements a
 #radial coordinate of spatial slice must not exceed the edge of the diamond
     phi = np.random.rand(1, n) * 2 * np.pi #one angle must go from 0 to 2*pi 
 #getting the spatial coordinates in cartesian coords
+    x = np.zeros(d-1, n)
     if d == 2:
-        x = r * np.sin(phi)
+        x = r * 2 - np.cos(np.pi * t / 2)
     elif d == 3:
         x = np.zeros(2, n)
         x[0, :] = np.cos(phi) * r
