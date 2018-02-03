@@ -5,33 +5,57 @@ def polar2Cart(theta, phi):
     cosTheta = np.cos(theta); sinTheta = np.sin(theta)
     cosPhi = np.cos(phi); sinPhi = np.sin(phi) 
 
-    d = theta.size[0] + 2; n = theta.size[1]
-    x = np.zeros(d-1, n)
-    indices = np.arange(d-2)
+    d = theta.shape[0] + 3; n = theta.shape[1]
+    x = np.zeros((d-1, n))
+    indices = np.arange(d-3)
 
     for i in range(d-3):
         x[i, :] = np.prod(sinTheta[indices != i, :], axis = 0) * cosTheta[i, :]
 
 #https://tribordo.wordpress.com/2013/06/18/how-to-select-all-rows-except-one-in-python-with-numpy/
 
-    x[d-2, :] = np.prod(sinTheta, axis = 0) * sinPhi
-    x[d-1, :] = np.prod(sinTheta, axis = 0) * cosPhi
+    x[d-3, :] = np.prod(sinTheta, axis = 0) * sinPhi
+    x[d-2, :] = np.prod(sinTheta, axis = 0) * cosPhi
 
     return x
+
+def tRand(t, d):
+# given a uniform random sprinkling t, returns a sprinkling for the time coordinate 
+# of a causal diamond with spherical diameter in d spacetime dimensions with the correct dist
+
+    small = (t < 0.5)
+    big = (t >= 0.5)
+
+    t[small] = -1 + (2*t[small])**(1./d)
+    t[big] = 1 - (2*(1 - t[big]))**(1./d)
+
+    return t
+
+
+
+def rRand(r, d):
+#given a uniform sprinkling r, returns a sprinkling for the radial coordinate
+# of a causal diamon with spherical diameter in d spacetime dimension with the correct dist
+
+    r = r**(1./(d-1))
+
+    return r 
 
 
 def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements and curvature c
 
-    t = np.random.rand(1, n) * 2 - 1 #making time go from -1 to 1
-    r = np.random.rand(1, n) * np.cos(np.pi * t / 2)
+    t = np.random.ran(1, n)
+    t = tRand(t, d) #returns a random array of t-coords between -1 and 1 
+    r = np.random.rand(1, n)
+    r = rRand(r, d) #returns an array of radii between 0 and 1 with the proper distribution
+    r = r * (1 - np.absolute(t))
 #radial coordinate of spatial slice must not exceed the edge of the diamond
     phi = np.random.rand(1, n) * 2 * np.pi #one angle must go from 0 to 2*pi 
 #getting the spatial coordinates in cartesian coords
-    x = np.zeros(d-1, n)
+    x = np.zeros((d-1, n))
     if d == 2:
-        x = r * 2 - np.cos(np.pi * t / 2)
+        x = r * 2 - (1 - np.absolute(t))
     elif d == 3:
-        x = np.zeros(2, n)
         x[0, :] = np.cos(phi) * r
         x[1, :] = np.sin(phi) * r
     else:
@@ -57,4 +81,4 @@ def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements a
     causalMat = (ds2 <= 0)
     causalMat = causalMat * mask
 
-    return causalMat.astype(int)
+    return causalMat.astype(int), t, x
