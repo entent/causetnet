@@ -2,6 +2,7 @@ import numpy as np
 
 def polar2Cart(theta, phi): 
 #given d-3 x n and a 1 x n dim arrays of angles, return a d-1 x n array of cartesian coords
+# not currently used
     cosTheta = np.cos(theta); sinTheta = np.sin(theta)
     cosPhi = np.cos(phi); sinPhi = np.sin(phi) 
 
@@ -42,6 +43,16 @@ def rRand(r, d):
     return r 
 
 
+def sphereRand(x):
+#given a sprinkling of a d-1 dimensional cube, returns a uniform sprinkling of a d-2 sphere
+#embedded in d-1 cartesian dimensions
+
+    mag = np.linalg.norm(x, axis = 0)
+    x = x/mag
+
+    return x
+
+
 def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements and curvature c
 
     t = np.random.ran(1, n)
@@ -49,18 +60,12 @@ def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements a
     r = np.random.rand(1, n)
     r = rRand(r, d) #returns an array of radii between 0 and 1 with the proper distribution
     r = r * (1 - np.absolute(t))
-#radial coordinate of spatial slice must not exceed the edge of the diamond
-    phi = np.random.rand(1, n) * 2 * np.pi #one angle must go from 0 to 2*pi 
 #getting the spatial coordinates in cartesian coords
-    x = np.zeros((d-1, n))
     if d == 2:
         x = r * 2 - (1 - np.absolute(t))
-    elif d == 3:
-        x[0, :] = np.cos(phi) * r
-        x[1, :] = np.sin(phi) * r
     else:
-        theta = np.random.rand(d-3, n) * np.pi #polar coordinates
-        x = polar2Cart(theta, phi)
+        x = np.random.rand(d-1, n)
+        x = sphereRand(x)
         x = r * x 
     
     #creating the causal matrix, 
