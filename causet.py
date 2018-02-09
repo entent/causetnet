@@ -55,7 +55,7 @@ def sphereRand(x):
 
 def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements and curvature c
 
-    t = np.random.ran(1, n)
+    t = np.random.rand(1, n)
     t = tRand(t, d) #returns a random array of t-coords between -1 and 1 
     r = np.random.rand(1, n)
     r = rRand(r, d) #returns an array of radii between 0 and 1 with the proper distribution
@@ -64,7 +64,7 @@ def causDiam(n, d = 2, c = 0): #creates a d-dim causal diamond with n elements a
     if d == 2:
         x = r * 2 - (1 - np.absolute(t))
     else:
-        x = np.random.rand(d-1, n)
+        x = np.random.rand(d-1, n) * 2 - 1
         x = sphereRand(x)
         x = r * x 
     
