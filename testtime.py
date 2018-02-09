@@ -8,11 +8,6 @@ import causet as cs
 
 d = 4
 c, t, x = cs.causDiam(1000, d)
-#X=np.random.rand(2,1000)
-#rot=np.array([[1, -1],[1, 1]])/np.sqrt(2)
-#X=np.dot(rot, X)
-#t=X[0,:]
-#x=X[1,:]
 
 #counting the number of points along the t-axis
 count = np.zeros((2,1000))
