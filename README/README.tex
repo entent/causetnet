@@ -43,14 +43,16 @@ as in the usual description of spacetime, quantum gravity in causal sets are fre
 
 \begin{figure}
 \begin{center}
-%  \includegraphics[width=3in]{tripoly.eps}
+  \includegraphics[width=5in]{causaldiamond2d.png}
 \end{center}
   \caption{
-The graph for the coding problem, with the vertices numbered as implemented in Java.} \label{causet2d}
+A $2$-dimensional causal diamond causal set with $1000$ spacetime points.  
+The axes are scaled such that something moving at the speed of light would travel at a 
+$45$ degree angle with the vertical.  Since the sides of the causal diamond are light rays, its sides are also at $45$ degree angles.} \label{causet2d}
 \end{figure}
 
 One way to create a causal set that approximates a continuous spacetime, is to ``sprinkle'' points at random into the continuum spacetime, see figure 
-\ref{causet2d} for a two-dimensional example.  Because the points are randomly sprinkled, there is approximately the same number of points per small volume 
+\ref{causet2d} for a two-dimensional example.  Because the points are randomly sprinkled, there is on average the same number of points per small volume 
 of the spacetime.  Also, this random sprinkling ensures that the causal set satisfies the same symmetries as the continuum spacetime.  As an example, if a 
 sphere is sprinkled with random points, since the sphere looks the same under any rotation, so will the random sprinkling under the same rotation.
 
@@ -123,9 +125,29 @@ in section \ref{future}, I outline next steps in the project.
 
 \section{Explanation of the Code}
 
+The code is written to be used in Python version 2.7.6, and uses the packages NumPy, Keras (and therefore TensorFlow in the back-end), and PyPlot for 
+creating plots.
+
+There are three main files that comprise this project: \code{causet.py} which generates random sprinklings of causal diamonds and outputs 
+the corresponding causal matrices, \code{datagen.py}, which generates the training and test sets of causal matrices, and reshapes the matrices into vectors so that 
+they can be fed into the VAE as vectors.  Finally, \code{causetencoder.py} trains a neural network to map the causalmatrices back to themselves, and 
+encodes their distributions into a $2$-dimensional latent space.  The code in this file was taken verbatim from 
+\cite{kerasauto}, with only slight modifications and comments added.
 
 
 \section{Results} \label{results}
+
+The VAE successfully separates out the causal sets for causal diamonds in $2$, $3$, and $4$ dimensions, as can be seen in figure \ref{resultsfig}.  
+It can also be seen that the distribution for each class are approximately $2$-d normal distributions.
+
+\begin{figure} [h]
+\begin{center}
+  \includegraphics[width=5in]{latent_encoding.png}
+\end{center}
+  \caption{
+The test set of causal matrices mapped into the $2$-dimensional latent space, coloured according to the dimension of the original causal sets.  
+The VAE has successfully separated the three classes of causal sets, with very little overlap between them.} \label{resultsfig}
+\end{figure}
 
 \section{Future Sections} \label{future}
 
