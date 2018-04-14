@@ -80,7 +80,7 @@ to recognize details or estimate quantities in causal sets, it could potentially
 If the causal connections between the causal set points are drawn as lines, the causal set can be viewed as a graph.  This graphlike nature means that 
 one might want to look for things like clusters of vertices in the graph, or perhaps more relevantly, the number of connections per vertex.
 
-\subsection{Variational Autoencoders}
+\subsection{Variational Autoencoders} \label{vaesection}
 
 A variational autoencoder \cite{vae} (VAE) is a type of neural network, which is trained to approximately map the input back to itself.  As such, 
 VAE's are an example of unsupervised learning, since it doesn't require labels to train the network parameters.
@@ -128,19 +128,65 @@ in section \ref{future}, I outline next steps in the project.
 The code is written to be used in Python version 2.7.6, and uses the packages NumPy, Keras (and therefore TensorFlow in the back-end), and PyPlot for 
 creating plots.
 
+The code creates the causal matrices for sprinklings causal diamonds in $d$ spacetime dimensions, where the spacetime itself is flat {\it Minkowski} 
+spacetime.  The $2$-dimensional sprinkling of a diamond can be seen in figure \ref{causet2d}.  In higher dimensions, the spatial cross-section of the 
+diamond is a ball of $d-1$ dimensions.  For example, in $3$ dimensions, at a constant time, the spatial slice a disk, and in $4$ dimensions, it is a 
+ball in the sense that it is normally used.  The reason I use a diamond for the sprinkling, is because it constrains the causal set to be finite in extent, 
+to have comparable shapes in different dimensions, and to virtually guarantee that many points will be causally related.
+
+The code then generates a training set and test set of causal matrices. The training set is then fed into the VAE, which is trained on  
+using to the loss function described in \ref{vaesection}.  Finally, using the trained network, the test set is fed into the VAE, and a plot of its 
+encoding in the latent space is created.
+
 There are three main files that comprise this project: \code{causet.py} which generates random sprinklings of causal diamonds and outputs 
 the corresponding causal matrices, \code{datagen.py}, which generates the training and test sets of causal matrices, and reshapes the matrices into vectors so that 
 they can be fed into the VAE as vectors.  Finally, \code{causetencoder.py} trains a neural network to map the causalmatrices back to themselves, and 
 encodes their distributions into a $2$-dimensional latent space.  The code in this file was taken verbatim from 
-\cite{kerasauto}, with only slight modifications and comments added.
+\cite{kerasauto}, with only slight modifications and comments added.  I will now discuss in more detail the contents of these files:
+
+\begin{enumerate}
+ \item \code{causet.py}: Contains the following functions:
+ \begin{itemize}
+  \item \code{polar2Cart}: A legacy function for converting higher-dimensional polar coordinates into Cartesian coordinates that is not used in the 
+  current version of the program.
+  \item \code{tRand(t, d)}: This function takes a vector $t$ containing values from a uniform random distribution, and converts it intovalues from  the correct 
+  random distribution along the time direction of a causal diamond, the cross section of which is a spherical $d-1$-dimensional ball. 
+  \item \code{rRand(r, d)}: Given a vector $r$ containing values from a uniform random distribution, this function converts it into values from the correct 
+  random distribution along the radial direction of a spatial slice of the causal diamond.
+  \item \code{sphereRand(x)}: The matrix $x$ contains vectors of $d-1$ uniform random numbers.  These vectors are divided by their norms, so that they 
+  become constrained to a unit sphere.  It turns out that this procedure guarantees that the sphere has a uniform sprinkling of points on its surface
+  \item \code{causDiam(n, d = 2, c = 0)}:  Creates a sprinkling of $n$ points, on a causal diamond in $d$ spacetime dimensions, where the spacetime has 
+  curvature $c$ (currently only $c=0$ is implemented).  It creates two $1\times n$ vectors, and one $(d-1)\times n$ matrix (when $d>2$) each of 
+  whose entries are random numbers from a uniform distribution.  Then, using the functions described above, the distributions are mapped to the correct 
+  distributions for a causal diamond for each of the orthogonal directions in a cylindrical cordinate system\footnote{The radial coordinate is initially 
+  a random sprinkling in the range $[0, 1]$, and is then rescaled according to the matching time coordinate so that the point lies within the diamond.}.  
+  Finally, the matrix $ds2$ is created to calculate the distance\footnote{Using the formula $\Delta s^2 = -\Delta t^2 + \Delta\vec{x}^2$.}.  If the distance 
+  between points $i$ and $j$ is smaller than zero, the points are timelike related.  If point $i$ comes before point $j$ in time, the causal matrix entry 
+  $c_{ij} = 1$, otherwise $0$.  This is all implemented in a vectorized manner.  The causalmatrix, vector of time coordinates, and matrix of Cartesian 
+  $x$-coordinates are returned.
+  \cite{cubetosphere}.
+ \end{itemize}
+
+\end{enumerate}
+
+
+There are several scripts in the \code{tests} directory.  The scripts \code{testtime.py}, \code{testrad.py}, \code{testsphere.py} and \code{plots.R} 
+are for visualizing and testing that the random distributions of the sprinklings 
+are the correct shapes, so that the sprinkling density is approximately a constant per unit volume of the original space.  The reason for these tests 
+are that the distribution as a function of coordinates is no longer a uniform distribution and needs to be derived for each orthogonal coordinate.  
+An appendix will be added to explain what these distributions are and how they were derived, and also to show that the sprinkling is indeed the correct 
+distribution.  Also in the directory \code{tests} is the script \code{causmattest.py}, which calculates the same causal matrix that is calculated in 
+\code{causet.py} in a more straightforward, but less computationally efficient way.  This was to check that the causal matrix is calculated correctly 
+from the sprinklings in \code{causet.py}.  Finally, the script \code{causdiamplot.py} creates a plot of the sprinkling in the 2-D causal diamond in flat 
+spacetime.
 
 
 \section{Results} \label{results}
 
 The VAE successfully separates out the causal sets for causal diamonds in $2$, $3$, and $4$ dimensions, as can be seen in figure \ref{resultsfig}.  
-It can also be seen that the distribution for each class are approximately $2$-d normal distributions.
+It can also be seen that the distribution for each class are approximately $2$-D normal distributions.
 
-\begin{figure} [h]
+\begin{figure} [ht]
 \begin{center}
   \includegraphics[width=5in]{latent_encoding.png}
 \end{center}
@@ -191,6 +237,7 @@ M.~Shiffman, ``Introducing Variational Autoencoders (in Prose and Code),'' \href
  Available at \href{https://github.com/keras-team/keras/blob/master/examples/variational_autoencoder.py}{https://github.com/keras-team/keras/blob/master/examples/variational\_autoencoder.py}
 \bibitem{klexplain} Comment 5 by user radek on \href{http://forums.fast.ai/t/intuition-behind-kl-divergence-regularization-in-vaes/1650/4}
 {http://forums.fast.ai/t/intuition-behind-kl-divergence-regularization-in-vaes/1650/4}
+\bibitem{cubetosphere} See e.g. \href{https://stats.stackexchange.com/questions/7977/how-to-generate-uniformly-distributed-points-on-the-surface-of-the-3-d-unit-sphe}{https://stats.stackexchange.com/questions/7977/how-to-generate-uniformly-distributed-points-on-the-surface-of-the-3-d-unit-sphe}
 \end{thebibliography}
 
 
