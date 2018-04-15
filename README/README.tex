@@ -9,7 +9,7 @@
 \def\code#1{\texttt{#1}}
 
 %opening
-\title{Unsupervised learning on causal sets with variational autencoders}
+\title{Unsupervised learning on causal sets with variational autoencoders}
 \author{Anton van Niekerk}
 
 \begin{document}
@@ -140,7 +140,7 @@ encoding in the latent space is created.
 
 There are three main files that comprise this project: \code{causet.py} which generates random sprinklings of causal diamonds and outputs 
 the corresponding causal matrices, \code{datagen.py}, which generates the training and test sets of causal matrices, and reshapes the matrices into vectors so that 
-they can be fed into the VAE as vectors.  Finally, \code{causetencoder.py} trains a neural network to map the causalmatrices back to themselves, and 
+they can be fed into the VAE as vectors.  Finally, \code{causetencoder.py} trains a neural network to map the causal matrices back to themselves, and 
 encodes their distributions into a $2$-dimensional latent space.  The code in this file was taken verbatim from 
 \cite{kerasauto}, with only slight modifications and comments added.  I will now discuss in more detail the contents of these files:
 
@@ -149,23 +149,33 @@ encodes their distributions into a $2$-dimensional latent space.  The code in th
  \begin{itemize}
   \item \code{polar2Cart}: A legacy function for converting higher-dimensional polar coordinates into Cartesian coordinates that is not used in the 
   current version of the program.
-  \item \code{tRand(t, d)}: This function takes a vector $t$ containing values from a uniform random distribution, and converts it intovalues from  the correct 
-  random distribution along the time direction of a causal diamond, the cross section of which is a spherical $d-1$-dimensional ball. 
+  \item \code{tRand(t, d)}: This function takes a vector $t$ containing values from a uniform random distribution, and converts it into values from  the correct 
+  random distribution along the time direction of a causal diamond using the method of {\it inverse transform sampling} \cite{its}, 
+  the cross section of which is a spherical $d-1$-dimensional ball. 
   \item \code{rRand(r, d)}: Given a vector $r$ containing values from a uniform random distribution, this function converts it into values from the correct 
   random distribution along the radial direction of a spatial slice of the causal diamond.
   \item \code{sphereRand(x)}: The matrix $x$ contains vectors of $d-1$ uniform random numbers.  These vectors are divided by their norms, so that they 
-  become constrained to a unit sphere.  It turns out that this procedure guarantees that the sphere has a uniform sprinkling of points on its surface
+  become constrained to a unit sphere.  It turns out that this procedure guarantees that the sphere has a uniform sprinkling of points on its surface 
+  \cite{cubetosphere}.
   \item \code{causDiam(n, d = 2, c = 0)}:  Creates a sprinkling of $n$ points, on a causal diamond in $d$ spacetime dimensions, where the spacetime has 
   curvature $c$ (currently only $c=0$ is implemented).  It creates two $1\times n$ vectors, and one $(d-1)\times n$ matrix (when $d>2$) each of 
   whose entries are random numbers from a uniform distribution.  Then, using the functions described above, the distributions are mapped to the correct 
-  distributions for a causal diamond for each of the orthogonal directions in a cylindrical cordinate system\footnote{The radial coordinate is initially 
+  distributions for a causal diamond for each of the orthogonal directions in a cylindrical coordinate system\footnote{The radial coordinate is initially 
   a random sprinkling in the range $[0, 1]$, and is then rescaled according to the matching time coordinate so that the point lies within the diamond.}.  
   Finally, the matrix $ds2$ is created to calculate the distance\footnote{Using the formula $\Delta s^2 = -\Delta t^2 + \Delta\vec{x}^2$.}.  If the distance 
   between points $i$ and $j$ is smaller than zero, the points are timelike related.  If point $i$ comes before point $j$ in time, the causal matrix entry 
-  $c_{ij} = 1$, otherwise $0$.  This is all implemented in a vectorized manner.  The causalmatrix, vector of time coordinates, and matrix of Cartesian 
+  $c_{ij} = 1$, otherwise $0$.  This is all implemented in a vectorized manner.  The causal matrix, vector of time coordinates, and matrix of Cartesian 
   $x$-coordinates are returned.
-  \cite{cubetosphere}.
+ 
  \end{itemize}
+ 
+ \item \code{datagen.py}: This is a script that calls the \code{causDiam} function of \code{causet.py} to generate a training set of \code{tot\_train} 
+ training set examples of causal matrices per spacetime dimension, and \code{tot\_test} test set examples, where each causal matrix is of size $n\times n$, 
+ for causal sets with $n$ points.  The causal matrices are then reshaped into $1\times n^2$ matrices, and are saved in a 
+ $(3\cdot$\code{tot\_train}$)\times n^2$ matrix and $(3\cdot$\code{tot\_test}$)\times n^2$ matrix respectively, the $3$ coming from the fact that we 
+ have training and test examples for spacetime dimension $2$, $3$, and $4$.  The spacetime dimension of each causal set corresponding to each causal matrix 
+ are also saved in $3\cdot$\code{tot\_train} and $3\cdot$\code{tot\_test} dimensional vectors, these dimensional values will serve as colour labels 
+ when visualizing latent space encoding.
 
 \end{enumerate}
 
@@ -237,6 +247,7 @@ M.~Shiffman, ``Introducing Variational Autoencoders (in Prose and Code),'' \href
  Available at \href{https://github.com/keras-team/keras/blob/master/examples/variational_autoencoder.py}{https://github.com/keras-team/keras/blob/master/examples/variational\_autoencoder.py}
 \bibitem{klexplain} Comment 5 by user radek on \href{http://forums.fast.ai/t/intuition-behind-kl-divergence-regularization-in-vaes/1650/4}
 {http://forums.fast.ai/t/intuition-behind-kl-divergence-regularization-in-vaes/1650/4}
+\bibitem{its} \href{https://en.wikipedia.org/wiki/Inverse\_transform\_sampling}{https://en.wikipedia.org/wiki/Inverse\_transform\_sampling}
 \bibitem{cubetosphere} See e.g. \href{https://stats.stackexchange.com/questions/7977/how-to-generate-uniformly-distributed-points-on-the-surface-of-the-3-d-unit-sphe}{https://stats.stackexchange.com/questions/7977/how-to-generate-uniformly-distributed-points-on-the-surface-of-the-3-d-unit-sphe}
 \end{thebibliography}
 
