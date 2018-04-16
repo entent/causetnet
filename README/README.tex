@@ -176,7 +176,20 @@ encodes their distributions into a $2$-dimensional latent space.  The code in th
  have training and test examples for spacetime dimension $2$, $3$, and $4$.  The spacetime dimension of each causal set corresponding to each causal matrix 
  are also saved in $3\cdot$\code{tot\_train} and $3\cdot$\code{tot\_test} dimensional vectors, these dimensional values will serve as colour labels 
  when visualizing latent space encoding.
+ 
+ \item \code{causetencoder.py}: As mentioned, this file is a slightly modified version of the code in \cite{kerasauto}, and contains the Keras teams 
+ code for a VAE with fully connected layers.  Using the Keras framework, it defines the layers of the neural network, namely an input layer of dimension 
+ $10000$, followed by an intermediate layer of dimension $1024$, then the latent layer consisting of two independent $2$-dimensional vectors 
+ $z_{\text mean}$ and $z_{\text log var}$ as described in section 
+ \ref{vaesection}, another $1024$-dimensional intermediate layer that is fully connected to the vector $z$ which is a combination of 
+ $z_{\text mean}$ and $z_{\text log var}$ through the \code{samplings} function, as also described in section \ref{vaesection}, and finally the output layer of dimension $10000$.  Each layer is 
+ transformed into the shape of the next layer through a linear  transformation, followed by being fed into a ReLU function (except for the last layer, 
+ which is fed into a sigmoid function). Finally, the loss function is defined, as described in section \ref{vaesection}, and the network is then 
+ trained on the training set.  After the network is trained, the test set of causal matrices is fed into the network, and their encoding in the 
+ latent space is plotted, using the dimension of each causal set as a colour label.
+ 
 
+ 
 \end{enumerate}
 
 
